@@ -102,8 +102,8 @@ jobs:
             # No --wait: the container's deno-eval healthcheck is heavy on this
             # small box; the curl health gate below is the real readiness check.
             $COMPOSE up -d portfolio
-            # Health gate (loopback + SNI), matching final-cut's deploy check.
-            PORTFOLIO_DOMAIN="$(grep -E '^PORTFOLIO_DOMAIN=' .env | cut -d= -f2- | tr -d '"')"
-            curl -fsS --retry 8 --retry-delay 4 --retry-connrefused \
-              --resolve "$PORTFOLIO_DOMAIN:443:127.0.0.1" \
-              "https://$PORTFOLIO_DOMAIN/" > /dev/null
+            # Health gate (loopback + SNI). Domain is hardcoded to match the
+            # hardcoded nginx vhost (final-cut's .env has no PORTFOLIO_DOMAIN).
+            curl -fsS --retry 10 --retry-delay 3 --retry-connrefused \
+              --resolve "andrewbilenduke.com:443:127.0.0.1" \
+              "https://andrewbilenduke.com/" > /dev/null
