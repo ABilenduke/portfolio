@@ -97,6 +97,10 @@ jobs:
             # recreated (it re-resolves portfolio:3000 via Docker DNS), so this
             # never disturbs the live final-cut site.
             cd /opt/final-cut
+            # The portfolio's own runtime env (e.g. NUXT_PUBLIC_DISCORD_WEBHOOK_URL)
+            # lives in /opt/portfolio/.env — source it so compose interpolation
+            # picks it up (final-cut's .env still supplies the base service vars).
+            if [ -f /opt/portfolio/.env ]; then set -a; . /opt/portfolio/.env; set +a; fi
             COMPOSE="docker compose -f docker-compose.yml -f /opt/portfolio/deploy/compose.registry.yml"
             $COMPOSE pull portfolio
             # No --wait: the container's deno-eval healthcheck is heavy on this
