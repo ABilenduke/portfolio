@@ -1,27 +1,26 @@
-# Registry-based deploy overlay (used by .github/workflows/release.yml on the
-# droplet). Pulls the prebuilt GHCR image instead of building. Layer it onto
-# final-cut's compose, e.g. from /opt/final-cut:
+# Standalone portfolio deploy — INDEPENDENT of final-cut's compose.
 #
-#   docker compose \
-#     -f docker-compose.yml \
-#     -f docker-compose.prod.yml \
-#     -f /opt/portfolio/deploy/compose.registry.yml \
-#     up -d --wait portfolio
+# This file defines ONLY the portfolio container and attaches it to final-cut's
+# existing Docker network (declared `external`), so final-cut's nginx reaches it
+# as portfolio:3000. It never references final-cut's docker-compose.yml, so a
+# portfolio deploy physically cannot create, recreate, or re-env any final-cut
+# service. The only thing final-cut provides is the nginx vhost conf in its
+# conf.d (deploy/nginx/portfolio.conf.template).
 #
-# Requires in final-cut's .env (or shell): IMAGE_TAG, PORTFOLIO_DOMAIN,
-# NUXT_PUBLIC_DISCORD_WEBHOOK_URL. (For local/build deploys use
-# compose.portfolio.yml instead.)
+# Deployed (by .github/workflows/release.yml) as its own compose project:
+#   cd /opt/portfolio
+#   docker compose -p portfolio --env-file /opt/portfolio/.env \
+#     -f deploy/compose.registry.yml up -d portfolio
 
 services:
   portfolio:
     image: ghcr.io/abilenduke/portfolio:${IMAGE_TAG:-latest}
     container_name: portfolio
     environment:
-      # Runtime config — no rebuild needed to change it.
       - NUXT_PUBLIC_DISCORD_WEBHOOK_URL=${NUXT_PUBLIC_DISCORD_WEBHOOK_URL:-}
+    networks:
+      - web
     healthcheck:
-      # deno eval is a heavy probe on a small box — run it less often, allow
-      # more time. (The release pipeline gates on a curl HTTP check, not this.)
       test: ["CMD", "deno", "eval", "await fetch('http://127.0.0.1:3000/')"]
       interval: 60s
       timeout: 10s
@@ -29,8 +28,7 @@ services:
       start_period: 45s
     restart: unless-stopped
 
-# This overlay defines ONLY the portfolio container (it joins final-cut's
-# `default` network, so nginx reaches it as portfolio:3000). The nginx vhost is
-# a standalone, hardcoded file dropped into final-cut's conf.d templates during
-# the one-time bootstrap — it carries no envsubst vars, so a final-cut nginx
-# recreate can never break on it. See deploy/DEPLOY.md.
+networks:
+  web:
+    external: true
+    name: final-cut_default

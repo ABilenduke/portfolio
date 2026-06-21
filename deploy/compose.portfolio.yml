@@ -1,47 +1,32 @@
-# Adds the portfolio to final-cut's stack and points its nginx at it.
-# Run from the final-cut repo, layered after its own compose files:
+# Standalone portfolio deploy (BUILD variant) — INDEPENDENT of final-cut.
 #
-#   docker compose \
-#     -f docker-compose.yml \
-#     -f docker-compose.prod.yml \
-#     -f /path/to/portfolio/deploy/compose.portfolio.yml \
-#     up -d --build
+# Same as compose.registry.yml but builds the image locally instead of pulling
+# from GHCR. Use for a manual/local build deploy. Run from the portfolio repo:
+#   docker compose -p portfolio --env-file .env -f deploy/compose.portfolio.yml up -d --build portfolio
 #
-# Requires these in final-cut's .env (or the shell env):
-#   PORTFOLIO_DOMAIN=andrewbilenduke.com        # <-- your portfolio domain
-#   NUXT_PUBLIC_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
-#
-# `context` assumes the portfolio repo is checked out next to final-cut on the
-# host. Adjust the path, or swap `build:` for `image:` if you push to a registry
-# (mirroring final-cut/docker-compose.registry.yml).
+# Like the registry variant, it only defines the portfolio container and joins
+# final-cut's network (external) — it never references final-cut's compose.
 
 services:
   portfolio:
     build:
-      context: ../portfolio
+      context: ..
       target: production
-      args:
-        NUXT_PUBLIC_DISCORD_WEBHOOK_URL: ${NUXT_PUBLIC_DISCORD_WEBHOOK_URL:-}
+    image: portfolio:local
     container_name: portfolio
     environment:
-      # Runtime config — changing this does NOT require a rebuild (SSR).
       - NUXT_PUBLIC_DISCORD_WEBHOOK_URL=${NUXT_PUBLIC_DISCORD_WEBHOOK_URL:-}
+    networks:
+      - web
     healthcheck:
       test: ["CMD", "deno", "eval", "await fetch('http://127.0.0.1:3000/')"]
-      interval: 30s
-      timeout: 5s
+      interval: 60s
+      timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 45s
     restart: unless-stopped
 
-  # Extend the existing nginx service: give it the portfolio vhost's env and
-  # make it wait for the portfolio to be healthy. (Compose merges these onto
-  # final-cut's nginx definition.)
-  nginx:
-    environment:
-      - PORTFOLIO_DOMAIN=${PORTFOLIO_DOMAIN}
-      - PORTFOLIO_SSL_CERTIFICATE=/etc/letsencrypt/live/${PORTFOLIO_DOMAIN}/fullchain.pem
-      - PORTFOLIO_SSL_CERTIFICATE_KEY=/etc/letsencrypt/live/${PORTFOLIO_DOMAIN}/privkey.pem
-    depends_on:
-      portfolio:
-        condition: service_healthy
+networks:
+  web:
+    external: true
+    name: final-cut_default

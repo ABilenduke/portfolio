@@ -89,25 +89,23 @@ jobs:
           envs: IMAGE_TAG
           script: |
             set -euo pipefail
-            # Pin the portfolio checkout to the released tag (for deploy/ files).
             cd /opt/portfolio
             git fetch --tags --quiet
             git checkout --quiet "$IMAGE_TAG"
-            # Roll the portfolio container on final-cut's stack. nginx is NOT
-            # recreated (it re-resolves portfolio:3000 via Docker DNS), so this
-            # never disturbs the live final-cut site.
-            cd /opt/final-cut
-            # The portfolio's own runtime env (e.g. NUXT_PUBLIC_DISCORD_WEBHOOK_URL)
-            # lives in /opt/portfolio/.env — source it so compose interpolation
-            # picks it up (final-cut's .env still supplies the base service vars).
-            if [ -f /opt/portfolio/.env ]; then set -a; . /opt/portfolio/.env; set +a; fi
-            COMPOSE="docker compose -f docker-compose.yml -f /opt/portfolio/deploy/compose.registry.yml"
+            # FULLY STANDALONE: this deploy NEVER references final-cut's compose,
+            # so it cannot create/recreate/re-env any final-cut service. The
+            # portfolio runs as its own 'portfolio' compose project, joins
+            # final-cut's network (declared external in the compose file), and
+            # reads its own /opt/portfolio/.env.
+            ENVFILE=""; [ -f /opt/portfolio/.env ] && ENVFILE="--env-file /opt/portfolio/.env"
+            COMPOSE="docker compose -p portfolio $ENVFILE -f deploy/compose.registry.yml"
             $COMPOSE pull portfolio
-            # No --wait: the container's deno-eval healthcheck is heavy on this
-            # small box; the curl health gate below is the real readiness check.
+            # Adopt the container into the 'portfolio' project (an earlier coupled
+            # deploy may have created it under the 'final-cut' project). Brief,
+            # portfolio-only recreate; nginx re-resolves it via Docker DNS.
+            docker rm -f portfolio 2>/dev/null || true
             $COMPOSE up -d portfolio
-            # Health gate (loopback + SNI). Domain is hardcoded to match the
-            # hardcoded nginx vhost (final-cut's .env has no PORTFOLIO_DOMAIN).
+            # Health gate (loopback + SNI) against the hardcoded nginx vhost.
             curl -fsS --retry 10 --retry-delay 3 --retry-connrefused \
               --resolve "andrewbilenduke.com:443:127.0.0.1" \
               "https://andrewbilenduke.com/" > /dev/null
