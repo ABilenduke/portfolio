@@ -1,0 +1,38 @@
+# Registry-based deploy overlay (used by .github/workflows/release.yml on the
+# droplet). Pulls the prebuilt GHCR image instead of building. Layer it onto
+# final-cut's compose, e.g. from /opt/final-cut:
+#
+#   docker compose \
+#     -f docker-compose.yml \
+#     -f docker-compose.prod.yml \
+#     -f /opt/portfolio/deploy/compose.registry.yml \
+#     up -d --wait portfolio
+#
+# Requires in final-cut's .env (or shell): IMAGE_TAG, PORTFOLIO_DOMAIN,
+# NUXT_PUBLIC_DISCORD_WEBHOOK_URL. (For local/build deploys use
+# compose.portfolio.yml instead.)
+
+services:
+  portfolio:
+    image: ghcr.io/abilenduke/portfolio:${IMAGE_TAG:-latest}
+    container_name: portfolio
+    environment:
+      # Runtime config — no rebuild needed to change it.
+      - NUXT_PUBLIC_DISCORD_WEBHOOK_URL=${NUXT_PUBLIC_DISCORD_WEBHOOK_URL:-}
+    healthcheck:
+      test: ["CMD", "deno", "eval", "await fetch('http://127.0.0.1:3000/')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # Give final-cut's nginx the portfolio vhost env + wait for it to be healthy.
+  nginx:
+    environment:
+      - PORTFOLIO_DOMAIN=${PORTFOLIO_DOMAIN}
+      - PORTFOLIO_SSL_CERTIFICATE=/etc/letsencrypt/live/${PORTFOLIO_DOMAIN}/fullchain.pem
+      - PORTFOLIO_SSL_CERTIFICATE_KEY=/etc/letsencrypt/live/${PORTFOLIO_DOMAIN}/privkey.pem
+    depends_on:
+      portfolio:
+        condition: service_healthy

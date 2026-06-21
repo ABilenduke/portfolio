@@ -1,0 +1,107 @@
+name: Release
+
+# Tag-driven build → GHCR → SSH deploy to the droplet, mirroring final-cut.
+#   git tag -a v1.0.0 -m "Portfolio v1.0.0" && git push origin v1.0.0
+# Or re-deploy an existing tag via the "Run workflow" button (workflow_dispatch).
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to (re)deploy (e.g. v1.0.0)
+        required: true
+
+env:
+  IMAGE: ghcr.io/abilenduke/portfolio
+
+jobs:
+  build-push:
+    name: Build & push image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve & validate version
+        id: version
+        env:
+          # workflow_dispatch input is user-controlled — validate before use.
+          RAW_VERSION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}
+        run: |
+          if [[ ! "$RAW_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version '$RAW_VERSION' (expected vMAJOR.MINOR.PATCH)" >&2
+            exit 1
+          fi
+          echo "value=$RAW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.value }}
+            type=raw,value=latest,enable=${{ github.event_name == 'push' }}
+
+      - name: Build & push (production target)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: production
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to droplet
+    needs: build-push
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      IMAGE_TAG: ${{ needs.build-push.outputs.version }}
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          # IMAGE_TAG is a validated semver passed as an env var (never
+          # interpolated into the script body) to avoid command injection.
+          envs: IMAGE_TAG
+          script: |
+            set -euo pipefail
+            # Pin the portfolio checkout to the released tag (for deploy/ files).
+            cd /opt/portfolio
+            git fetch --tags --quiet
+            git checkout --quiet "$IMAGE_TAG"
+            # Roll the portfolio container on final-cut's stack. nginx is NOT
+            # recreated (it re-resolves portfolio:3000 via Docker DNS), so this
+            # never disturbs the live final-cut site.
+            cd /opt/final-cut
+            COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml -f /opt/portfolio/deploy/compose.registry.yml"
+            $COMPOSE pull portfolio
+            $COMPOSE up -d --wait portfolio
+            # Health gate (loopback + SNI), matching final-cut's deploy check.
+            PORTFOLIO_DOMAIN="$(grep -E '^PORTFOLIO_DOMAIN=' .env | cut -d= -f2- | tr -d '"')"
+            curl -fsS --retry 8 --retry-delay 4 --retry-connrefused \
+              --resolve "$PORTFOLIO_DOMAIN:443:127.0.0.1" \
+              "https://$PORTFOLIO_DOMAIN/" > /dev/null
