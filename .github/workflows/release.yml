@@ -99,7 +99,9 @@ jobs:
             cd /opt/final-cut
             COMPOSE="docker compose -f docker-compose.yml -f /opt/portfolio/deploy/compose.registry.yml"
             $COMPOSE pull portfolio
-            $COMPOSE up -d --wait portfolio
+            # No --wait: the container's deno-eval healthcheck is heavy on this
+            # small box; the curl health gate below is the real readiness check.
+            $COMPOSE up -d portfolio
             # Health gate (loopback + SNI), matching final-cut's deploy check.
             PORTFOLIO_DOMAIN="$(grep -E '^PORTFOLIO_DOMAIN=' .env | cut -d= -f2- | tr -d '"')"
             curl -fsS --retry 8 --retry-delay 4 --retry-connrefused \

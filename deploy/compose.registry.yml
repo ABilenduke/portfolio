@@ -20,11 +20,13 @@ services:
       # Runtime config — no rebuild needed to change it.
       - NUXT_PUBLIC_DISCORD_WEBHOOK_URL=${NUXT_PUBLIC_DISCORD_WEBHOOK_URL:-}
     healthcheck:
+      # deno eval is a heavy probe on a small box — run it less often, allow
+      # more time. (The release pipeline gates on a curl HTTP check, not this.)
       test: ["CMD", "deno", "eval", "await fetch('http://127.0.0.1:3000/')"]
-      interval: 30s
-      timeout: 5s
+      interval: 60s
+      timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 45s
     restart: unless-stopped
 
 # This overlay defines ONLY the portfolio container (it joins final-cut's
