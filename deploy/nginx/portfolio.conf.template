@@ -1,19 +1,21 @@
 # Portfolio vhost for final-cut's nginx.
 # Copy to: final-cut/nginx/templates/conf.d/portfolio.conf.template
-# Rendered by the official nginx image's envsubst entrypoint. Requires these
-# env vars on the nginx service (see deploy/DEPLOY.md):
-#   PORTFOLIO_DOMAIN, PORTFOLIO_SSL_CERTIFICATE, PORTFOLIO_SSL_CERTIFICATE_KEY
+#
+# Domain + cert paths are HARDCODED on purpose: the file carries no envsubst
+# vars, so it renders identically on every nginx (re)start and a final-cut
+# redeploy can never break on a missing ${PORTFOLIO_*} env. nginx variables
+# like $host are left untouched (the official entrypoint only substitutes
+# variables that are actually set in the environment).
 #
 # NOTE: do NOT redefine `map $http_upgrade $connection_upgrade` here — it is
-# already declared in default.conf.template (same http{} block). This is a
-# plain reverse proxy to the Deno SSR container; no websocket upgrade needed.
+# already declared in default.conf.template (same http{} block).
 
 # ──────────────────────────────────────────────
 # HTTP → HTTPS redirect (+ ACME challenge)
 # ──────────────────────────────────────────────
 server {
     listen 80;
-    server_name ${PORTFOLIO_DOMAIN};
+    server_name andrewbilenduke.com;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -30,15 +32,15 @@ server {
 server {
     listen 443 ssl;
     http2 on;
-    server_name ${PORTFOLIO_DOMAIN};
+    server_name andrewbilenduke.com;
 
     # Resolve the upstream at request time via Docker's embedded DNS.
     resolver 127.0.0.11 valid=30s;
     set $upstream_portfolio portfolio:3000;
 
     # ── SSL/TLS hardening (matches the customer vhost) ──
-    ssl_certificate     ${PORTFOLIO_SSL_CERTIFICATE};
-    ssl_certificate_key ${PORTFOLIO_SSL_CERTIFICATE_KEY};
+    ssl_certificate     /etc/letsencrypt/live/andrewbilenduke.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/andrewbilenduke.com/privkey.pem;
     ssl_protocols       TLSv1.2 TLSv1.3;
     ssl_ciphers         ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
     ssl_prefer_server_ciphers on;

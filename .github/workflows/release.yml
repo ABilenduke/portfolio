@@ -97,7 +97,7 @@ jobs:
             # recreated (it re-resolves portfolio:3000 via Docker DNS), so this
             # never disturbs the live final-cut site.
             cd /opt/final-cut
-            COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml -f /opt/portfolio/deploy/compose.registry.yml"
+            COMPOSE="docker compose -f docker-compose.yml -f /opt/portfolio/deploy/compose.registry.yml"
             $COMPOSE pull portfolio
             $COMPOSE up -d --wait portfolio
             # Health gate (loopback + SNI), matching final-cut's deploy check.

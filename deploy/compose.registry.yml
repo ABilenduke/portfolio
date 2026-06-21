@@ -27,12 +27,8 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  # Give final-cut's nginx the portfolio vhost env + wait for it to be healthy.
-  nginx:
-    environment:
-      - PORTFOLIO_DOMAIN=${PORTFOLIO_DOMAIN}
-      - PORTFOLIO_SSL_CERTIFICATE=/etc/letsencrypt/live/${PORTFOLIO_DOMAIN}/fullchain.pem
-      - PORTFOLIO_SSL_CERTIFICATE_KEY=/etc/letsencrypt/live/${PORTFOLIO_DOMAIN}/privkey.pem
-    depends_on:
-      portfolio:
-        condition: service_healthy
+# This overlay defines ONLY the portfolio container (it joins final-cut's
+# `default` network, so nginx reaches it as portfolio:3000). The nginx vhost is
+# a standalone, hardcoded file dropped into final-cut's conf.d templates during
+# the one-time bootstrap — it carries no envsubst vars, so a final-cut nginx
+# recreate can never break on it. See deploy/DEPLOY.md.
