@@ -38,7 +38,7 @@ const cols = [
       <div class="footer-grid">
         <div>
           <a href="#top" class="footer-brand">
-            <div class="footer-brand__mark">A</div>
+            <div class="footer-brand__mark">AB</div>
             <span class="footer-brand__name">Andrew Bilenduke</span>
           </a>
           <p class="footer-brand__desc">
@@ -102,8 +102,8 @@ const cols = [
   place-items: center;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 18px;
-  letter-spacing: -0.04em;
+  font-size: 13.5px;
+  letter-spacing: -0.05em;
 }
 .footer-brand__name {
   font-family: var(--font-display);

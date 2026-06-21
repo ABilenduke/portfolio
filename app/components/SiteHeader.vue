@@ -44,7 +44,7 @@ onBeforeUnmount(() => {
   <header class="site-header" :class="{ scrolled, 'menu-open': menuOpen }">
     <div class="container site-header__inner">
       <a href="#top" class="brand" @click="menuOpen = false">
-        <div class="brand__mark">A</div>
+        <div class="brand__mark">AB</div>
         <div class="brand__text">
           <span class="brand__name">Andrew Bilenduke</span>
           <span class="brand__role">senior full-stack engineer</span>
@@ -193,8 +193,8 @@ onBeforeUnmount(() => {
   place-items: center;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 18px;
-  letter-spacing: -0.04em;
+  font-size: 13.5px;
+  letter-spacing: -0.05em;
 }
 .brand__text {
   display: flex;

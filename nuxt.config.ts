@@ -43,7 +43,8 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'en' },
       link: [
-        { rel: 'icon', type: 'image/svg+xml', href: '/assets/logo-mark.svg' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/assets/logo-ab.svg' },
+        { rel: 'apple-touch-icon', href: '/assets/apple-touch-icon.png' },
       ],
     },
   },
