@@ -1,0 +1,495 @@
+/* ==========================================================================
+   Andrew Bilenduke Design System
+   Colors, Type, Spacing & Motion tokens
+   --------------------------------------------------------------------------
+   Light theme is the default. A `[data-theme="dark"]` block at the bottom
+   reassigns semantic tokens — the rest of the system stays unchanged.
+
+   Webfonts (Sora, Inter, JetBrains Mono) are self-hosted at build time by
+   @nuxt/fonts — see nuxt.config.ts `fonts` and the detection helper in
+   site.css. (Original design self-hosted .ttf files / Google @import.)
+   ========================================================================== */
+
+/* ==========================================================================
+   ROOT TOKENS — light theme (default)
+   ========================================================================== */
+:root {
+  /* --- Brand: blue ------------------------------------------------------ */
+  /* Rich, professional blue. Not Tailwind sky, not Material indigo.
+     Slightly cool, with an architect's restraint. */
+  --blue-50:  #eef4ff;
+  --blue-100: #dbe7ff;
+  --blue-200: #b9cffe;
+  --blue-300: #8dadf9;
+  --blue-400: #5e87f1;
+  --blue-500: #3a64e3;   /* primary action */
+  --blue-600: #2848c4;   /* hover */
+  --blue-700: #1f3aa1;   /* pressed / strong text */
+  --blue-800: #1c3280;
+  --blue-900: #1a2b66;
+  --blue-950: #111c44;
+
+  /* Brand "ink" — the deep navy used for headlines and the dark-theme base */
+  --ink-50:  #f5f7fb;
+  --ink-100: #e7ecf4;
+  --ink-200: #ccd5e3;
+  --ink-300: #a3b1c7;
+  --ink-400: #6f7f9b;
+  --ink-500: #4a5870;
+  --ink-600: #364257;
+  --ink-700: #243149;   /* body strong */
+  --ink-800: #182238;
+  --ink-900: #0f172a;
+  --ink-950: #0a1020;
+
+  /* --- Cool slate neutrals --------------------------------------------- */
+  --slate-50:  #f7f9fc;
+  --slate-100: #eef2f7;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd4e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+
+  /* --- Accents — restrained -------------------------------------------- */
+  --cyan-100: #d6f1f7;
+  --cyan-200: #aee2ee;
+  --cyan-500: #1ea7c2;   /* technical / info accent */
+  --cyan-700: #0e6f86;
+
+  --amber-100: #fdecc8;
+  --amber-200: #f9d68b;
+  --amber-500: #d68a1a;   /* warm accent: highlights, "now" markers */
+  --amber-700: #8a5410;
+
+  /* --- Status colors --------------------------------------------------- */
+  --green-100: #d6f4e1;
+  --green-500: #198754;
+  --green-700: #0f5c39;
+
+  --red-100: #fde0e0;
+  --red-500: #c4343a;
+  --red-700: #8c1c20;
+
+  /* --- Off-white surfaces ---------------------------------------------- */
+  --paper:        #fbfcfe;   /* page background, off-white with cool tint */
+  --paper-warm:   #f8f6f1;   /* alt section background, slightly warm */
+  --surface:      #ffffff;   /* card, dialog */
+  --surface-sunk: #f3f6fb;   /* nested or pressed surface */
+
+  /* ====================================================================
+     SEMANTIC COLOR TOKENS — these are what apps should consume.
+     The raw scale above can change without breaking products.
+     ==================================================================== */
+
+  /* Foreground (text & icons) */
+  --fg-1: var(--ink-900);     /* primary body, h1–h3 */
+  --fg-2: var(--slate-700);   /* secondary body, muted headings */
+  --fg-3: var(--slate-500);   /* tertiary, metadata */
+  --fg-4: var(--slate-400);   /* disabled, placeholder */
+  --fg-on-brand: #ffffff;     /* text on filled brand bg */
+  --fg-link: var(--blue-600);
+  --fg-link-hover: var(--blue-700);
+
+  /* Background */
+  --bg-page:    var(--paper);
+  --bg-alt:     var(--slate-50);
+  --bg-surface: var(--surface);
+  --bg-sunk:    var(--surface-sunk);
+  --bg-tint:    var(--blue-50);     /* "pale blue highlight" */
+  --bg-code:    var(--slate-900);   /* code blocks */
+  --bg-warm:    var(--paper-warm);
+
+  /* Borders */
+  --border-1: rgba(15, 23, 42, 0.08);   /* hairline, default */
+  --border-2: rgba(15, 23, 42, 0.14);   /* visible separation */
+  --border-3: rgba(15, 23, 42, 0.22);   /* form input idle */
+  --border-strong: var(--ink-700);
+  --border-focus: var(--blue-500);
+  --border-brand: var(--blue-200);
+
+  /* Brand semantic */
+  --brand:           var(--blue-500);
+  --brand-hover:     var(--blue-600);
+  --brand-pressed:   var(--blue-700);
+  --brand-soft:      var(--blue-50);
+  --brand-soft-text: var(--blue-700);
+
+  /* Accent semantic */
+  --accent-cool:     var(--cyan-500);
+  --accent-cool-soft:var(--cyan-100);
+  --accent-warm:     var(--amber-500);
+  --accent-warm-soft:var(--amber-100);
+
+  /* Status semantic */
+  --success:      var(--green-500);
+  --success-soft: var(--green-100);
+  --danger:       var(--red-500);
+  --danger-soft:  var(--red-100);
+
+  /* Selection */
+  --selection-bg: var(--blue-100);
+  --selection-fg: var(--blue-900);
+
+  /* ====================================================================
+     TYPOGRAPHY — major-third scale (1.25)
+     Base is 16px; 1rem = 16px.
+     ==================================================================== */
+  --font-display: "Sora", "Inter", system-ui, -apple-system, sans-serif;
+  --font-body:    "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Type scale — major third, anchored at 16 */
+  --fs-2xs:  0.694rem;  /* 11.1 */
+  --fs-xs:   0.8rem;    /* 12.8 */
+  --fs-sm:   0.875rem;  /* 14   — small text, captions, metadata */
+  --fs-base: 1rem;      /* 16   — body */
+  --fs-md:   1.125rem;  /* 18   — lead body */
+  --fs-lg:   1.25rem;   /* 20 */
+  --fs-xl:   1.563rem;  /* 25 */
+  --fs-2xl:  1.953rem;  /* 31.25 — h3 */
+  --fs-3xl:  2.441rem;  /* 39    — h2 */
+  --fs-4xl:  3.052rem;  /* 48.8  — h1 */
+  --fs-5xl:  3.815rem;  /* 61    — hero */
+  --fs-6xl:  4.768rem;  /* 76.3  — display */
+
+  /* Line heights — generous */
+  --lh-tight:   1.1;    /* display */
+  --lh-snug:    1.25;   /* h1–h3 */
+  --lh-normal:  1.55;   /* body */
+  --lh-relaxed: 1.7;    /* long-form */
+
+  /* Letter spacing */
+  --ls-display: -0.022em;
+  --ls-heading: -0.012em;
+  --ls-body:    0;
+  --ls-mono:    -0.005em;
+  --ls-eyebrow: 0.08em;   /* uppercase eyebrow labels */
+
+  /* Weights */
+  --fw-regular:   400;
+  --fw-medium:    500;
+  --fw-semibold:  600;
+  --fw-bold:      700;
+  --fw-extrabold: 800;
+
+  /* ====================================================================
+     SPACING — 8-pt system (with 4 as the only sub-unit)
+     ==================================================================== */
+  --space-0:  0;
+  --space-1:  4px;     /* hairline gap, icon-text */
+  --space-2:  8px;     /* small gap */
+  --space-3:  12px;
+  --space-4:  16px;    /* component padding (tight) */
+  --space-5:  20px;
+  --space-6:  24px;    /* component padding, card/grid gap */
+  --space-7:  32px;    /* component padding (loose), card/grid gap */
+  --space-8:  40px;
+  --space-9:  48px;
+  --space-10: 64px;    /* section spacing (compact) */
+  --space-11: 80px;
+  --space-12: 96px;    /* section spacing (default) */
+  --space-13: 128px;   /* section spacing (loose, hero) */
+  --space-14: 160px;
+
+  /* Layout containers */
+  --container-sm:   640px;
+  --container-md:   768px;
+  --container-lg:   1024px;
+  --container-xl:   1200px;   /* primary content max */
+  --container-2xl:  1320px;
+  --container-prose: 68ch;     /* readable text width */
+
+  /* ====================================================================
+     RADII
+     ==================================================================== */
+  --radius-xs:   4px;     /* tags, tight pills */
+  --radius-sm:   6px;     /* code chips, small inputs */
+  --radius-md:   10px;    /* buttons, inputs */
+  --radius-lg:   14px;    /* small cards */
+  --radius-xl:   20px;    /* large cards */
+  --radius-2xl:  28px;    /* hero panels */
+  --radius-pill: 9999px;  /* skill badges, capsule nav */
+
+  /* ====================================================================
+     SHADOWS — light, layered, never heavy
+     Built around a cool ink shadow rather than pure black.
+     ==================================================================== */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 14px 32px rgba(15, 23, 42, 0.08), 0 4px 8px rgba(15, 23, 42, 0.04);
+  --shadow-xl: 0 28px 64px rgba(15, 23, 42, 0.12), 0 8px 16px rgba(15, 23, 42, 0.05);
+
+  /* Brand-tinted lift, used on hover for primary cards */
+  --shadow-brand: 0 12px 32px rgba(58, 100, 227, 0.18);
+
+  /* Inset / sunk */
+  --shadow-inset: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+
+  /* Focus ring — accessible 3px outer halo */
+  --focus-ring: 0 0 0 3px rgba(58, 100, 227, 0.35);
+
+  /* ====================================================================
+     MOTION
+     ==================================================================== */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);    /* default exit */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);  /* sparingly */
+
+  --dur-fast:   120ms;   /* color, opacity */
+  --dur-base:   200ms;   /* default */
+  --dur-slow:   320ms;   /* layout shifts */
+  --dur-page:   480ms;   /* page-level transitions */
+
+  /* ====================================================================
+     Z-INDEX
+     ==================================================================== */
+  --z-base:    1;
+  --z-sticky:  100;
+  --z-overlay: 500;
+  --z-modal:   1000;
+  --z-toast:   2000;
+}
+
+/* ==========================================================================
+   DARK THEME — only semantic tokens are reassigned.
+   Activate with <html data-theme="dark"> or matching media query.
+   ========================================================================== */
+[data-theme="dark"] {
+  --fg-1: #eef2f7;
+  --fg-2: #c2cbd9;
+  --fg-3: #8d99ad;
+  --fg-4: #5d6a80;
+  --fg-on-brand: #ffffff;
+  --fg-link: #8dadf9;
+  --fg-link-hover: #b9cffe;
+
+  --bg-page:    #0b1222;
+  --bg-alt:     #0e1730;
+  --bg-surface: #131c33;
+  --bg-sunk:    #0a1020;
+  --bg-tint:    rgba(58, 100, 227, 0.12);
+  --bg-code:    #060a17;
+  --bg-warm:    #1a1814;
+
+  --border-1: rgba(255, 255, 255, 0.08);
+  --border-2: rgba(255, 255, 255, 0.14);
+  --border-3: rgba(255, 255, 255, 0.22);
+  --border-strong: #c2cbd9;
+  --border-focus: #5e87f1;
+  --border-brand: rgba(94, 135, 241, 0.35);
+
+  --brand:           #5e87f1;
+  --brand-hover:     #8dadf9;
+  --brand-pressed:   #b9cffe;
+  --brand-soft:      rgba(94, 135, 241, 0.14);
+  --brand-soft-text: #b9cffe;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 14px 32px rgba(0, 0, 0, 0.55);
+  --shadow-xl: 0 28px 64px rgba(0, 0, 0, 0.6);
+  --shadow-brand: 0 12px 32px rgba(94, 135, 241, 0.25);
+
+  --selection-bg: rgba(94, 135, 241, 0.35);
+  --selection-fg: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    /* mirror the dark block — kept commented to keep light as explicit default */
+  }
+}
+
+/* ==========================================================================
+   SEMANTIC ELEMENT STYLES — opt-in via class or :where() so they don't
+   leak into UI kits that want to do their own thing.
+   ========================================================================== */
+
+.ds-doc,
+:where(.ds-doc) {
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  color: var(--fg-1);
+  background: var(--bg-page);
+  letter-spacing: var(--ls-body);
+  font-feature-settings: "ss01", "cv11", "cv05";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.ds-doc ::selection {
+  background: var(--selection-bg);
+  color: var(--selection-fg);
+}
+
+/* Display — used for hero/landing headlines */
+.ds-display,
+:where(.ds-doc) h1.display {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: clamp(2.441rem, 1.6rem + 3.5vw, var(--fs-6xl));
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-display);
+  color: var(--fg-1);
+  text-wrap: balance;
+}
+
+/* Headings */
+:where(.ds-doc) h1,
+.ds-h1 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-4xl);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-display);
+  color: var(--fg-1);
+  text-wrap: balance;
+  margin: 0 0 var(--space-4);
+}
+
+:where(.ds-doc) h2,
+.ds-h2 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-3xl);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-heading);
+  color: var(--fg-1);
+  text-wrap: balance;
+  margin: 0 0 var(--space-4);
+}
+
+:where(.ds-doc) h3,
+.ds-h3 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-heading);
+  color: var(--fg-1);
+  margin: 0 0 var(--space-3);
+}
+
+:where(.ds-doc) h4,
+.ds-h4 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-xl);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-heading);
+  color: var(--fg-1);
+  margin: 0 0 var(--space-2);
+}
+
+/* Eyebrow — small uppercase label above section headings */
+.ds-eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+/* Body */
+:where(.ds-doc) p,
+.ds-p {
+  font-size: var(--fs-base);
+  line-height: var(--lh-relaxed);
+  color: var(--fg-2);
+  max-width: var(--container-prose);
+  text-wrap: pretty;
+  margin: 0 0 var(--space-4);
+}
+
+.ds-lead {
+  font-size: var(--fs-md);
+  line-height: var(--lh-relaxed);
+  color: var(--fg-2);
+  max-width: var(--container-prose);
+  text-wrap: pretty;
+}
+
+.ds-small {
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  color: var(--fg-3);
+}
+
+/* Code */
+:where(.ds-doc) code,
+.ds-code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  letter-spacing: var(--ls-mono);
+  background: var(--bg-tint);
+  color: var(--brand-soft-text);
+  padding: 0.12em 0.4em;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-brand);
+}
+
+:where(.ds-doc) pre,
+.ds-pre {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  background: var(--bg-code);
+  color: #e7ecf4;
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+
+:where(.ds-doc) pre code,
+.ds-pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* Links */
+:where(.ds-doc) a,
+.ds-link {
+  color: var(--fg-link);
+  text-decoration-color: color-mix(in oklab, var(--fg-link) 35%, transparent);
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1.5px;
+  transition: color var(--dur-fast) var(--ease-out),
+              text-decoration-color var(--dur-fast) var(--ease-out);
+}
+:where(.ds-doc) a:hover,
+.ds-link:hover {
+  color: var(--fg-link-hover);
+  text-decoration-color: currentColor;
+}
+
+/* Focus visible — applies system-wide */
+:where(.ds-doc) :focus-visible,
+.ds-focus:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

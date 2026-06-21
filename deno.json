@@ -1,0 +1,10 @@
+{
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "dev": "NITRO_NO_UNIX_SOCKET=1 deno run -A npm:nuxt dev",
+    "build": "deno run -A npm:nuxt build",
+    "generate": "deno run -A npm:nuxt generate",
+    "preview": "deno run -A npm:nuxt preview",
+    "prepare": "deno run -A npm:nuxt prepare"
+  }
+}
